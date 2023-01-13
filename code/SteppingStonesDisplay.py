@@ -7,9 +7,9 @@ import asyncio
 import qtm
 import main
 
-def start_program():
-    asyncio.ensure_future(main.setup())
-    asyncio.get_event_loop().run_forever()
+FrameNumber = 0
+
+async def start_program():
     
     os.environ["SDL_VIDEO_CENTERED"] = "1"
     stone_counter = 0
@@ -60,6 +60,7 @@ def start_program():
     prev_stone = stones[0]      
     running = True 
     
+
     while running:
         
         screen.fill((255, 255, 255))
@@ -78,8 +79,11 @@ def start_program():
     
 
         pygame.display.update()
-    
+        # process events in the background
+        pygame.event.pump()
+        await asyncio.sleep(0)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
