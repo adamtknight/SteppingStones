@@ -7,17 +7,17 @@ import asyncio
 import qtm
 import pygame
 import testdisplay
+from queue import Queue
 
 FrameNumber = 0
-
-def get_frame_number():
-    return FrameNumber
+frame_queue = Queue()
 
 def on_packet(packet):
     global FrameNumber
+    FrameNumber = packet.framenumber
+    frame_queue.put(FrameNumber)
     """ Callback function that is called everytime a data packet arrives from QTM """
     print("Framenumber: {}".format(packet.framenumber))
-    FrameNumber = packet.framenumber
     header, markers = packet.get_3d_markers()
     print("Component info: {}".format(header))
     for marker in markers:
