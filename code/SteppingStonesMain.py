@@ -7,7 +7,7 @@ import pygame # library for creating GUI elements
 pygame.init()
 
 # set up the screen with a size of 800x600
-screen = pygame.display.set_mode((200, 200))
+screen = pygame.display.set_mode((800, 600))
 
 # set the caption/title of the screen to "Moving Circle"
 pygame.display.set_caption("Moving Circle")
@@ -25,13 +25,8 @@ def on_packet(packet):
     frame_number = packet.framenumber
     header, markers = packet.get_3d_markers_no_label()
     for marker in markers:
-        # if marker.x > 800 and marker.x < 100  and marker.y> 400 and marker.y < 1500:
-        #     circle_x, circle_y = (marker.y) , (marker.x)
-        #     circle_x = (circle_x - 790)/2.95
-        #     circle_y = (circle_y - 1260)/2.95
-        if marker.x > 0 and marker.x < 200 * 3  and marker.y> 0 and marker.y < 200 *3:
-            circle_x, circle_y = (200 - marker.y/3) , (200 - marker.x/3)
-          
+        if marker.x > 0 and marker.x < 800  and marker.y>0 and marker.y <600:
+            circle_x, circle_y = 800 - marker.y ,  600 - marker.x
         
 
 async def draw_circle():
@@ -47,10 +42,10 @@ async def draw_circle():
                 pygame.quit()
                 sys.exit()
         # clear the screen
-        screen.fill((0, 255, 0))
+        screen.fill((0, 0, 0))
         
         # draw the circle
-        pygame.draw.circle(screen, (255, 0, 0), (circle_x, circle_y), 5)
+        pygame.draw.circle(screen, (255, 0, 0), (circle_x, circle_y), 25)
         
         # display the frame number
         font = pygame.font.Font(None, 30)
