@@ -1,38 +1,78 @@
+""" Example that takes control of QTM, streams data etc """
+
 import asyncio
+import logging
+
 import qtm
-import pyglet
 
-# initialize window
-window = pyglet.window.Window(width=800, height=600)
+LOG = logging.getLogger("example")
 
-# initialize variable to store frame number
-frame_number = 0
 
-def on_packet(packet):
-    """ Callback function that is called everytime a data packet arrives from QTM """
-    global frame_number
-    frame_number = packet.framenumber
+async def package_receiver(queue):
+    """ Asynchronous function that processes queue until None is posted in queue """
+    LOG.info("Entering package_receiver")
+    while True:
+        packet = await queue.get()
+        if packet is None:
+            break
 
-@window.event
-def on_draw():
-    """ Function to draw the frame number on the screen """
-    global frame_number
-    pyglet.gl.glClear(pyglet.gl.GL_COLOR_BUFFER_BIT)
-    label = pyglet.text.Label(f"Frame number: {frame_number}",
-                              font_name='Arial',
-                              font_size=12,
-                              x=10, y=10,
-                              anchor_x='left', anchor_y='bottom')
-    label.draw()
+        LOG.info("Framenumber %s", packet.framenumber)
+        header, cameras = packet.get_2d_markers()
+        LOG.info("Component info: %s", header)
+
+        for i, camera in enumerate(cameras, 1):
+            LOG.info("Camera %d", i)
+            for marker in camera:
+                LOG.info("\t%s", marker)
+
+    LOG.info("Exiting package_receiver")
+
+
+async def shutdown(delay, connection, receiver_future, queue):
+
+    # wait desired time before exiting
+    await asyncio.sleep(delay)
+
+    # make sure package_receiver task exits
+    queue.put_nowait(None)
+    await receiver_future
+
+    # tell qtm to stop streaming
+    await connection.stream_frames_stop()
+
+    # stop the event loop, thus exiting the run_forever call
+    loop.stop()
+
 
 async def setup():
-    """ Main function """
-    connection = await qtm.connect("127.0.0.1")
-    if connection is None:
-        return
+    """ main function """
 
-    await connection.stream_frames(components=["3d"], on_packet=on_packet)
+    connection = await qtm.connect("127.0.0.1")
+
+    if connection is None:
+        return -1
+
+    async with qtm.TakeControl(connection, "QTMpassword"):
+
+        state = await connection.get_state()
+        if state != qtm.QRTEvent.EventConnected:
+            await connection.new()
+            try:
+                await connection.await_event(qtm.QRTEvent.EventConnected, timeout=10)
+            except asyncio.TimeoutError:
+                LOG.error("Failed to start new measurement")
+                return -1
+
+        queue = asyncio.Queue()
+
+        receiver_future = asyncio.ensure_future(package_receiver(queue))
+
+        await connection.stream_frames(components=["2d"], on_packet=queue.put_nowait)
+        await connection.start()
+        asyncio.ensure_future(shutdown(30, connection, receiver_future, queue))
+
 
 if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
     asyncio.ensure_future(setup())
-    pyglet.app.run()
+    loop.run_forever()

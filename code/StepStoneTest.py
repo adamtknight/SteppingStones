@@ -2,7 +2,7 @@ import asyncio # library for asynchronous programming
 import sys # library for system-specific parameters and functions
 import qtm # library for connecting to the QTM server
 import pygame # library for creating GUI elements
-
+import logging
 # initialize pygame library
 pygame.init()
 
@@ -15,24 +15,25 @@ pygame.display.set_caption("Moving Circle")
 # initialize variables to store circle position and frame number
 circle_x, circle_y = 0, 0
 frame_number = 0
+LOG = logging.getLogger("example")
 
-def on_packet(packet):
-    """
-    Callback function that is called everytime a data packet arrives from QTM.
-    This function updates the position of the circle on the screen.
-    """
-    global circle_x, circle_y, frame_number
-    frame_number = packet.framenumber
-    header, markers = packet.get_3d_markers_no_label()
-    for marker in markers:
-        # if marker.x > 800 and marker.x < 100  and marker.y> 400 and marker.y < 1500:
-        #     circle_x, circle_y = (marker.y) , (marker.x)
-        #     circle_x = (circle_x - 790)/2.95
-        #     circle_y = (circle_y - 1260)/2.95
-        if marker.x > 0 and marker.x < 200 * 3  and marker.y> 0 and marker.y < 200 *3:
-            circle_x, circle_y = (200 - marker.y/3) , (200 - marker.x/3)
           
-        
+async def package_receiver(queue):
+    """ Asynchronous function that processes queue until None is posted in queue """
+    LOG.info("Entering package_receiver")
+    global circle_x, circle_y, frame_number
+    while True:
+        packet = await queue.get()
+        if packet is None:
+            break
+        header, markers = packet.get_3d_markers_no_label()
+        LOG.info("Component info: %s", header)
+        frame_number = packet.framenumber
+        for marker in markers:
+            if marker.x > 0 and marker.x < 200 * 3  and marker.y> 0 and marker.y < 200 *3:
+                circle_x, circle_y = (200 - marker.y/3) , (200 - marker.x/3)
+
+    LOG.info("Exiting package_receiver")   
 
 async def draw_circle():
     """
@@ -60,21 +61,51 @@ async def draw_circle():
         # update the display
         pygame.display.flip()
         await asyncio.sleep(0.01)
+async def shutdown(delay, connection, receiver_future, queue):
+
+    # wait desired time before exiting
+    await asyncio.sleep(delay)
+
+    # make sure package_receiver task exits
+    queue.put_nowait(None)
+    await receiver_future
+
+    # tell qtm to stop streaming
+    await connection.stream_frames_stop()
+
+    # stop the event loop, thus exiting the run_forever call
+    loop.stop()
 
 async def setup():
-    """
-    Main function that connects to QTM server and starts the draw_circle task
-    """
-    # connect to QTM server
-    connection = await qtm.connect("127.0.0.1")
-    if connection is None:
-        return
+    """ main function """
 
-    # stream frame data and pass on_packet function as callback
-    await connection.stream_frames(components=["3dnolabels"], on_packet=on_packet)
-    asyncio.ensure_future(draw_circle())
+    connection = await qtm.connect("127.0.0.1")
+
+    if connection is None:
+        return -1
+
+    async with qtm.TakeControl(connection, "QTMpassword"):
+
+        state = await connection.get_state()
+        if state != qtm.QRTEvent.EventConnected:
+            await connection.new()
+            try:
+                await connection.await_event(qtm.QRTEvent.EventConnected, timeout=10)
+            except asyncio.TimeoutError:
+                LOG.error("Failed to start new measurement")
+                return -1
+
+        queue = asyncio.Queue()
+
+        receiver_future = asyncio.ensure_future(package_receiver(queue))
+
+        await connection.stream_frames(components=["3dnolabels"], on_packet=queue.put_nowait)
+        await connection.start()
+        asyncio.ensure_future(shutdown(30, connection, receiver_future, queue))
+        asyncio.ensure_future(draw_circle())
 
 if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
     # start the setup function as a task
     asyncio.ensure_future(setup())
     # run event loop forever
