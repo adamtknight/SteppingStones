@@ -1,14 +1,17 @@
 import asyncio # library for asynchronous programming
+import os 
 import sys # library for system-specific parameters and functions
 import qtm # library for connecting to the QTM server
 import pygame # library for creating GUI elements
 import logging
+
+
 # initialize pygame library
 pygame.init()
 
 # set up the screen with a size of 800x600
 screen = pygame.display.set_mode((200, 200))
-
+os.environ["SDL_VIDEO_WINDOW_POS"] = "950,650"
 # set the caption/title of the screen to "Moving Circle"
 pygame.display.set_caption("Moving Circle")
 
@@ -101,7 +104,7 @@ async def setup():
 
         await connection.stream_frames(components=["3dnolabels"], on_packet=queue.put_nowait)
         await connection.start()
-        asyncio.ensure_future(shutdown(30, connection, receiver_future, queue))
+        asyncio.ensure_future(shutdown(120, connection, receiver_future, queue))
         asyncio.ensure_future(draw_circle())
 
 if __name__ == "__main__":

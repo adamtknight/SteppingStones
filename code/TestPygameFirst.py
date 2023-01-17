@@ -11,9 +11,6 @@ stone_counter = 0
 screen_width = 1000
 screen_height = 500
 
-# Create a font object
-font = pygame.font.SysFont(None, 48)
-
 # Create the screen and set the caption
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Stepping Stones")
@@ -63,7 +60,7 @@ while running:
         else: side = "left"
         stones.append(Stone(1, side))
         prev_stone = stones[len(stones) - 1] 
-    # update the position of stones)
+    # update the position of stones
     for stone in stones:
         if stone.x < screen_width and stone.x > 0:
             stone.x = stone.x + vel
