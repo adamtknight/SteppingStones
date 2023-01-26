@@ -7,11 +7,12 @@ import logging
 
 
 # initialize pygame library
+os.environ["SDL_VIDEO_WINDOW_POS"] = "950,650"
 pygame.init()
 
 # set up the screen with a size of 800x600
 screen = pygame.display.set_mode((200, 200))
-os.environ["SDL_VIDEO_WINDOW_POS"] = "950,650"
+
 # set the caption/title of the screen to "Moving Circle"
 pygame.display.set_caption("Moving Circle")
 

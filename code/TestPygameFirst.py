@@ -22,7 +22,7 @@ stone_width = 100
 stone_height = 60
 left_stone_height = 100
 right_stone_height = 200
-vel = 0.1
+vel = 1
 step_length = 100
 stones = []
 
@@ -50,7 +50,16 @@ side = "right"
 stones.append(Stone(1, side))  
 prev_stone = stones[0]      
 running = True 
+# Create a new surface for the stone
+stone_surface = pygame.Surface((stone_width, stone_height))
 
+# Draw the stone to the surface
+pygame.draw.rect(stone_surface, (223, 50, 223), (0, 0, stone_width, stone_height))
+
+# Convert the surface to display format
+stone_surface = stone_surface.convert()
+
+running = True 
 while running:
     # Clear the screen
     screen.fill((255, 255, 255))
@@ -64,7 +73,7 @@ while running:
     for stone in stones:
         if stone.x < screen_width and stone.x > 0:
             stone.x = stone.x + vel
-            stone.draw(screen)
+            screen.blit(stone_surface, (stone.x, stone.side == "left" and left_stone_height or right_stone_height))
         else:
             stones.pop(stones.index(stone))
     # Update the screen
