@@ -13,13 +13,15 @@ LEFT_SHIFT_FORWARD = False
 LEFT_SHIFT_RIGHT = True
 LEFT_SHIFT_LEFT = True
 
-PERTURBED_STEP_ARRAY = [4, 5, 6]
+PERTRUBED_STEP_ARRAY = [4, 5, 6]
 
 NUMBER_OF_STEPS = 100
 
 FILENAME = "TEST"
 FILE_DESTINATION_PATH = "C:/Users/Neurolab/Documents/Projects/Knight/SteppingStones/code/Temp_Main"
 BACKUP_FILE_PATH = "C:/Users/Neurolab/Documents/Projects/Knight/Back_Up_Stepping_Stones_Paths"
+
+
 
 num_steps = NUMBER_OF_STEPS
 shift_arr = []
@@ -47,7 +49,7 @@ if LEFT_SHIFT_LEFT:
     shift_arr.append(8)
 
 shift_arr_len = len(shift_arr)
-p_step_arr = PERTURBED_STEP_ARRAY
+p_step_arr = PERTRUBED_STEP_ARRAY
 p_step_arr_len = len(p_step_arr)
 
 

@@ -38,6 +38,7 @@ LEFT_SHIFT_LEFT_DIST = 0.15 # m
 
 FILEPATH_TO_STEPPATH = "C:/Users/Neurolab/Documents/Projects/Knight/SteppingStones/code/Temp_Main/TEST"
 
+#####START OF CODE######
 
 # Initialize pygame library and position the screen
 
@@ -120,15 +121,15 @@ pygame.display.flip()
 
 #Class for stepping stone
 class Stone:
-    def __init__(self, x: int, y: int, side: str, id: int, pertrubed: int ) -> None:
+    def __init__(self, x: int, y: int, side: str, id: int, perturbed: int ) -> None:
         """
-        Initializes a new stone object with the given x-coordinate, side, ID, and Pertrubed
+        Initializes a new stone object with the given x-coordinate, side, ID, and perturbed
         """
         self.x = x
         self.y = y
         self.side = side
         self.id=stone_counter
-        self.pertrubed = pertrubed
+        self.perturbed = perturbed
         self.color = (252, 3, 148)
 
     def draw(self, surface) -> None:
@@ -142,7 +143,7 @@ class Stone:
 
 global circle_x, circle_y, frame_number, stone_counter, color
 
-# set the pertrubed array
+# set the perturbed array
 try:
     with open(FILEPATH_TO_STEPPATH, "r") as file:
         content = file.read()
@@ -196,32 +197,32 @@ while running:
     for stone in stones:
         if stone.x < screen_width and stone.x >= 0 and stone.side == "right":
             stone.x = stone.x + distance_to_move_right
-            if stone.pertrubed and stone.x > threshold:
-                if stone.pertrubed == 1:
+            if stone.perturbed and stone.x > threshold:
+                if stone.perturbed == 1:
                     stone.x = stone.x - rsbd
-                elif stone.pertrubed == 2:
+                elif stone.perturbed == 2:
                     stone.x = stone.x + rsfd
-                elif stone.pertrubed == 3:
+                elif stone.perturbed == 3:
                     stone.y = stone.y - rsrd
-                elif stone.pertrubed == 4:
+                elif stone.perturbed == 4:
                     stone.y = stone.y + rsld
-                stone.pertrubed = 0
+                stone.perturbed = 0
                 stone.color = (252, 3, 3)
             stone.draw(screen)
             
             
         elif stone.x < screen_width and stone.x >= 0 and stone.side == "left":
             stone.x = stone.x + distance_to_move_right
-            if stone.pertrubed and stone.x > threshold:
-                if stone.pertrubed == 5:
+            if stone.perturbed and stone.x > threshold:
+                if stone.perturbed == 5:
                     stone.x = stone.x - lsbd
-                elif stone.pertrubed == 6:
+                elif stone.perturbed == 6:
                     stone.x = stone.x + lsfd
-                elif stone.pertrubed == 7:
+                elif stone.perturbed == 7:
                     stone.y = stone.y - lsrd
-                elif stone.pertrubed == 8:
+                elif stone.perturbed == 8:
                     stone.y = stone.y + lsld
-                stone.pertrubed = 0
+                stone.perturbed = 0
                 stone.color = (252, 3, 3)
             stone.draw(screen)
             
