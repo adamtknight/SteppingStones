@@ -53,8 +53,8 @@ THRESHOLD_ARR = [1, 1.5] # m
 PREDICTIVE = True
 THRESHOLD_MARKER_ID = 1 #Where in marker list, for AIM model, indexed at 0
 
-FILEPATH_TO_STEPPATH = "C:/Users/Neurolab/Documents/Projects/Knight/SteppingStones/Stepping-Stone-Paths/Trial2"
-FILEPATH_TO_OUTPUT_DATA = "C:/Users/Neurolab/Documents/Projects/Knight/SteppingStones/code/"
+FILEPATH_TO_STEPPATH = "C:/Users/Neurolab/..."
+FILEPATH_TO_OUTPUT_DATA = "C:/Users/Neurolab/..."
 
 #####START OF CODE######
 
@@ -191,7 +191,7 @@ def on_packet(packet):
     """
     global markers, frame_number
     frame_number = packet.framenumber
-    header, markers = packet.get_3d_markers_no_label()
+    header, markers = packet.get_3d_markers()
         
 
 async def draw_stones():
@@ -314,11 +314,11 @@ async def draw_stones():
       
                 else:
                     stones.pop(stones.index(stone))
-            for marker in markers:
-                if marker.x > -200 and marker.x < 1000  and marker.y> 116.8 and marker.y < 1400: 
-                    cx, cy = apply_inverse_homography(H_inv, marker.x, marker.y) 
-                    print(str(cx) + ", " + str(cy))     
-                    pygame.draw.circle(screen, (255, 0, 0), (cx, cy), 5)
+            # for marker in markers:
+            #     if marker.x > -200 and marker.x < 1000  and marker.y> 116.8 and marker.y < 1400: 
+            #         cx, cy = apply_inverse_homography(H_inv, marker.x, marker.y) 
+            #         print(str(cx) + ", " + str(cy))     
+            #         pygame.draw.circle(screen, (255, 0, 0), (cx, cy), 5)
             # update the display
             pygame.display.update()
             await asyncio.sleep(0.001)
